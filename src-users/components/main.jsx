@@ -1,11 +1,13 @@
 import React, {Component} from 'react'
 import PropTypes from 'prop-types'
-import PubSub from 'pubsub-js'
-
 import axios from 'axios'
 
 
 export default class Main extends Component {
+    static propTypes = {
+        searchName: PropTypes.string.isRequired
+    }
+
     state = {
         initView: true, //初始化UI
         loading: false, //加载中
@@ -14,53 +16,6 @@ export default class Main extends Component {
     };
 
 
-    //在组件挂载完毕时（React 内置的方法），订阅消息
-    componentDidMount(){
-        PubSub.subscribe('searchAction',(msg,data)=>{
-            console.log(msg,data);
-            const searchName = data;
-
-            //开始请求
-            this.setState({
-                initView: false,
-                loading: true
-            })
-            //
-            const url = `https://api.github.com/search/users?q=${searchName}`
-
-            axios.get(url).then(response => {
-                const result = response.data
-                const users = result.items.map(item =>
-                        // (
-                        //    {name:item.login,url:item.html_url,avatarUrl:item.avatar_url}
-                        // )
-                    {
-                        return {name: item.login, url: item.html_url, avatarUrl: item.avatar_url}
-                    }
-                )
-
-                // 注意：这里map的语法 map(item=>{return xx对象}) 或者是 map(item=>(xx对象))
-
-
-                this.setState({
-                    loading: false,
-                    users: users
-                })
-
-            }).catch(error => {
-                this.setState({
-                    loading: false,
-                    errorMsg: error.message
-                })
-            })
-
-
-        })
-
-
-
-    }
-/*
     //组件将要获取新的属性时，触发，这个方法是React的内置方法
     componentWillReceiveProps(newProps) {
         const oldName = this.props.searchName //这个是更新前的属性值
@@ -98,7 +53,7 @@ export default class Main extends Component {
                 errorMsg: error.message
             })
         })
-    }*/
+    }
 
     render() {
         const {initView, loading, users, errorMsg} = this.state;
